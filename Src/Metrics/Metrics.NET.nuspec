@@ -11,10 +11,6 @@
 
     <description>Metrics and Stuff</description>
 
-    <dependencies>
-      <dependency id="Mindscape.Raygun4Net" version="3.0.1" />
-    </dependencies>
-
   </metadata>
 
   <files>
