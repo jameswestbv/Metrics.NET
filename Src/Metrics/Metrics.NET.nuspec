@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package>
+
+  <metadata>
+
+    <id>Metrics.NET</id>
+
+    <version>1.0.0.0</version>
+
+    <authors>Brand View</authors>
+
+    <description>Metrics and Stuff</description>
+
+    <dependencies>
+      <dependency id="Mindscape.Raygun4Net" version="3.0.1" />
+    </dependencies>
+
+  </metadata>
+
+  <files>
+
+    <file src="$OutputPath$\Metrics.dll" target="lib" />
+    <file src="$OutputPath$\Metrics.pdb" target="lib" />
+
+  </files>
+
+</package>

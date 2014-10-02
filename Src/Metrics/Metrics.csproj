@@ -160,6 +160,7 @@
     <EmbeddedResource Include="Visualization\index.full.html.gz" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Metrics.NET.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
