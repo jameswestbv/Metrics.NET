@@ -1,8 +1,8 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using Metrics.Utils;
+
 namespace Metrics.Core
 {
     public interface SimpleMeterImplementation : SimpleMeter, MetricValueProvider<MeterValue> { }
