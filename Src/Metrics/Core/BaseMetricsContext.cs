@@ -103,6 +103,18 @@ namespace Metrics.Core
             return this.registry.Meter(name, builder, unit, rateUnit, tags);
         }
 
+        public SimpleMeter SimpleMeter(string name, Unit unit, TimeUnit rateUnit, MetricTags tags)
+        {
+            return this.SimpleMeter(name, unit, () => this.metricsBuilder.BuildSimpleMeter(name, unit, rateUnit), rateUnit, tags);
+        }
+
+        public SimpleMeter SimpleMeter<T>(string name, Unit unit, Func<T> builder, TimeUnit rateUnit, MetricTags tags)
+           where T : SimpleMeterImplementation
+        {
+            return this.registry.SimpleMeter(name, builder, unit, rateUnit, tags);
+        }
+
+
         public Histogram Histogram(string name, Unit unit, SamplingType samplingType, MetricTags tags)
         {
             return this.Histogram(name, unit, () => this.metricsBuilder.BuildHistogram(name, unit, samplingType), tags);

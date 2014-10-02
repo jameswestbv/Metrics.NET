@@ -41,6 +41,37 @@ namespace Metrics
         void Mark(string item, long count);
     }
 
+    public interface SimpleMeter : ResetableMetric, Utils.IHideObjectMembers
+    {
+        /// <summary>
+        /// Mark the occurrence of an event.
+        /// </summary>
+        void Mark();
+
+        /// <summary>
+        /// Mark the occurrence of an event for an item in a set.
+        /// The total rate of the event is updated, but the meter will also keep track and update a specific rate for each <paramref name="item"/> registered.
+        /// The meter value will contain the total rate and for each registered item the specific rate and percentage of total count.
+        /// </summary>
+        /// <param name="item">Item from the set for which to record the event.</param>
+        void Mark(string item);
+
+        /// <summary>
+        /// Mark the occurrence of <paramref name="count"/> events.
+        /// </summary>
+        /// <param name="count"></param>
+        void Mark(long count);
+
+        /// <summary>
+        /// Mark the occurrence of <paramref name="count"/> events for an item in a set.
+        /// The total rate of the event is updated, but the meter will also keep track and update a specific rate for each <paramref name="item"/> registered.
+        /// The meter value will contain the total rate and for each registered item the specific rate and percentage of total count.
+        /// </summary>
+        /// <param name="count"></param>
+        /// <param name="item">Item from the set for which to record the events.</param>
+        void Mark(string item, long count);
+    }
+
     /// <summary>
     /// The value reported by a Meter Metric
     /// </summary>
@@ -62,18 +93,20 @@ namespace Metrics
 
         public readonly long Count;
         public readonly double MeanRate;
+        public readonly double InstantRate;
         public readonly double OneMinuteRate;
         public readonly double FiveMinuteRate;
         public readonly double FifteenMinuteRate;
         public readonly SetItem[] Items;
 
-        internal MeterValue(long count, double meanRate, double oneMinuteRate, double fiveMinuteRate, double fifteenMinuteRate)
-            : this(count, meanRate, oneMinuteRate, fiveMinuteRate, fifteenMinuteRate, new SetItem[0]) { }
+        internal MeterValue(long count, double meanRate, double instantRate, double oneMinuteRate, double fiveMinuteRate, double fifteenMinuteRate)
+            : this(count, meanRate, instantRate, oneMinuteRate, fiveMinuteRate, fifteenMinuteRate, new SetItem[0]) { }
 
-        public MeterValue(long count, double meanRate, double oneMinuteRate, double fiveMinuteRate, double fifteenMinuteRate, SetItem[] items)
+        public MeterValue(long count, double meanRate, double instantRate, double oneMinuteRate, double fiveMinuteRate, double fifteenMinuteRate, SetItem[] items)
         {
             this.Count = count;
             this.MeanRate = meanRate;
+            this.InstantRate = instantRate;
             this.OneMinuteRate = oneMinuteRate;
             this.FiveMinuteRate = fiveMinuteRate;
             this.FifteenMinuteRate = fifteenMinuteRate;
@@ -85,6 +118,7 @@ namespace Metrics
             var factor = unit.ToSeconds(1);
             return new MeterValue(this.Count,
                 this.MeanRate * factor,
+                this.InstantRate * factor,
                 this.OneMinuteRate * factor,
                 this.FiveMinuteRate * factor,
                 this.FifteenMinuteRate * factor,

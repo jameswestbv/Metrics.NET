@@ -5,25 +5,31 @@ using System.Linq;
 using Metrics.Utils;
 namespace Metrics.Core
 {
+    public interface SimpleMeterImplementation : SimpleMeter, MetricValueProvider<MeterValue> { }
 
-    public interface MeterImplementation : Meter, MetricValueProvider<MeterValue> { }
-
-    public sealed class MeterMetric : MeterImplementation, IDisposable
+    public sealed class SimpleMeterMetric : SimpleMeterImplementation, IDisposable
     {
 
-        public static readonly TimeSpan TickInterval = TimeSpan.FromSeconds(5);
-     
+        public static readonly int InstantRateSampleMilliSeconds = 250;
+        public static readonly int TickIntervalSeconds = 2;
+
+        public static readonly TimeSpan TickInterval = TimeSpan.FromSeconds(TickIntervalSeconds);
+
+        public static readonly TimeSpan InstantRateTickInterval = TimeSpan.FromMilliseconds(InstantRateSampleMilliSeconds);
+
         private class MeterWrapper
         {
-
-            private double FifteenMinuteRate { get { return this.m15Rate.GetRate(TimeUnit.Seconds); } }
+         
+            private double FifteenMinuteRate { get { return this.m15Rate.GetRate(TimeUnit.Seconds);; } }
             private double FiveMinuteRate { get { return this.m5Rate.GetRate(TimeUnit.Seconds); } }
             private double OneMinuteRate { get { return this.m1Rate.GetRate(TimeUnit.Seconds); } }
-            private double InstantRate { get { return 0; } }
-                   
-            public readonly EWMA m1Rate = EWMA.OneMinuteEWMA();
-            public readonly EWMA m5Rate = EWMA.FiveMinuteEWMA();
-            public readonly EWMA m15Rate = EWMA.FifteenMinuteEWMA();
+            private double InstantRate { get { return this.instantRate.GetInstantRate(TimeUnit.Seconds); } }
+
+            public readonly AverageSampler instantRate = new AverageSampler(InstantRateSampleMilliSeconds, TimeUnit.Milliseconds, 250, TimeUnit.Milliseconds);
+            public readonly AverageSampler m1Rate = new AverageSampler(TickIntervalSeconds, TimeUnit.Seconds, 1, TimeUnit.Minutes);
+            public readonly AverageSampler m5Rate = new AverageSampler(TickIntervalSeconds, TimeUnit.Seconds, 5, TimeUnit.Minutes);
+            public readonly AverageSampler m15Rate = new AverageSampler(TickIntervalSeconds, TimeUnit.Seconds, 15, TimeUnit.Minutes);
+
             public AtomicLong count = new AtomicLong();
 
             public void Tick()
@@ -33,9 +39,15 @@ namespace Metrics.Core
                 this.m15Rate.Tick();
             }
 
+            public void InstantRateTick()
+            {
+                this.instantRate.Tick();
+            }
+
             public void Mark(long count)
             {
                 this.count.Add(count);
+                this.instantRate.Update(count);
                 this.m1Rate.Update(count);
                 this.m5Rate.Update(count);
                 this.m15Rate.Update(count);
@@ -43,6 +55,8 @@ namespace Metrics.Core
 
             public void Reset()
             {
+                this.count.SetValue(0);
+                this.instantRate.Reset();
                 this.m1Rate.Reset();
                 this.m5Rate.Reset();
                 this.m15Rate.Reset();
@@ -62,29 +76,35 @@ namespace Metrics.Core
 
                 return this.count.Value / elapsed * TimeUnit.Seconds.ToNanoseconds(1);
             }
-                       
+
+           
         }
-        
+
+
         private readonly ConcurrentDictionary<string, MeterWrapper> setMeters = new ConcurrentDictionary<string, MeterWrapper>();
 
         private readonly MeterWrapper wrapper = new MeterWrapper();
 
         private readonly Clock clock;
         private readonly Scheduler tickScheduler;
+        private readonly Scheduler instantRateTickScheduler;
 
         private long startTime;
 
-        public MeterMetric()
+        public SimpleMeterMetric()
             : this(Clock.Default, new ActionScheduler(), new ActionScheduler())
         { }
 
-        public MeterMetric(Clock clock, Scheduler scheduler, Scheduler instantRateScheduler)
+        public SimpleMeterMetric(Clock clock, Scheduler scheduler, Scheduler instantRateScheduler)
         {
             this.clock = clock;
             this.startTime = this.clock.Nanoseconds;
             this.tickScheduler = scheduler;
             this.tickScheduler.Start(TickInterval, () => Tick());
-         }
+
+            this.instantRateTickScheduler = instantRateScheduler;
+            this.instantRateTickScheduler.Start(InstantRateTickInterval, () => InstantRateTick());
+        }
 
         public void Mark()
         {
@@ -130,6 +150,15 @@ namespace Metrics.Core
             foreach (var value in setMeters.Values)
             {
                 value.Tick();
+            }
+        }
+
+        private void InstantRateTick()
+        {
+            this.wrapper.InstantRateTick();
+            foreach (var value in setMeters.Values)
+            {
+                value.InstantRateTick();
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 namespace Metrics.Utils
 {
     /// <summary>
@@ -22,9 +23,16 @@ namespace Metrics.Utils
         private volatile bool initialized = false;
         private VolatileDouble rate = new VolatileDouble(0.0);
 
+        private VolatileDouble _intstantRate = new VolatileDouble(0.0);
+
         private AtomicLong uncounted = new AtomicLong();
         private readonly double alpha;
         private readonly double interval;
+
+        public static EWMA InstantRate()
+        {
+            return new EWMA(0, Metrics.Core.SimpleMeterMetric.InstantRateSampleMilliSeconds, TimeUnit.Milliseconds);
+        }
 
         public static EWMA OneMinuteEWMA()
         {
@@ -57,6 +65,11 @@ namespace Metrics.Utils
             long count = uncounted.GetAndReset();
 
             double instantRate = count / interval;
+
+            //Debug.WriteLine(String.Format("Count: {0} Interval: {1}", count, interval));
+
+            _intstantRate.Set(instantRate);
+
             if (initialized)
             {
                 double doubleRate = rate.Get();
@@ -72,6 +85,11 @@ namespace Metrics.Utils
         public double GetRate(TimeUnit rateUnit)
         {
             return rate.Get() * (double)rateUnit.ToNanoseconds(1L);
+        }
+
+        public double GetInstantRate(TimeUnit rateUnit)
+        {
+            return _intstantRate.Get() * (double)rateUnit.ToNanoseconds(1L);
         }
 
         public void Reset()

@@ -120,6 +120,11 @@ namespace Metrics
             return globalContext.Meter(name, unit, rateUnit, tags);
         }
 
+        public static SimpleMeter SimpleMeter(string name, Unit unit, TimeUnit rateUnit = TimeUnit.Seconds, MetricTags tags = default(MetricTags))
+        {
+            return globalContext.SimpleMeter(name, unit, rateUnit, tags);
+        }
+
         /// <summary>
         /// A counter is a simple incrementing and decrementing 64-bit integer. Ex number of active requests.
         /// </summary>

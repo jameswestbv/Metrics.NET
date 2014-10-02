@@ -29,6 +29,16 @@ namespace Metrics.Core
             public void Reset() { }
         }
 
+        private class NullSimpleMeter : SimpleMeter
+        {
+            public static readonly SimpleMeter Instance = new NullSimpleMeter();
+            public void Mark() { }
+            public void Mark(long count) { }
+            public void Mark(string item) { }
+            public void Mark(string item, long count) { }
+            public void Reset() { }
+        }
+
         private class NullHistogram : Histogram
         {
             public static readonly Histogram Instance = new NullHistogram();
@@ -74,6 +84,11 @@ namespace Metrics.Core
             return NullMeter.Instance;
         }
 
+        public SimpleMeter SimpleMeter<T>(string name, Func<T> builder, Unit unit, TimeUnit rateUnit, MetricTags tags) where T : SimpleMeterImplementation
+        {
+            return NullSimpleMeter.Instance;
+        }
+
         public Histogram Histogram<T>(string name, Func<T> builder, Unit unit, MetricTags tags) where T : HistogramImplementation
         {
             return NullHistogram.Instance;
@@ -83,5 +98,8 @@ namespace Metrics.Core
         {
             return NullTimer.Instance;
         }
+
+
+        
     }
 }

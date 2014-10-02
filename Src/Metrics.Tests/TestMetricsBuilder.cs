@@ -34,7 +34,12 @@ namespace Metrics.Tests
 
         public MeterImplementation BuildMeter(string name, Unit unit, TimeUnit rateUnit)
         {
-            return new MeterMetric(this.clock, this.scheduler);
+            return new MeterMetric(this.clock, this.scheduler, this.scheduler);
+        }
+
+        public SimpleMeterImplementation BuildSimpleMeter(string name, Unit unit, TimeUnit rateUnit)
+        {
+            return new SimpleMeterMetric(this.clock, this.scheduler, this.scheduler);
         }
 
         public HistogramImplementation BuildHistogram(string name, Unit unit, SamplingType samplingType)
@@ -53,17 +58,18 @@ namespace Metrics.Tests
 
         public TimerImplementation BuildTimer(string name, Unit unit, TimeUnit rateUnit, TimeUnit durationUnit, SamplingType samplingType)
         {
-            return new TimerMetric(new HistogramMetric(new ExponentiallyDecayingReservoir(this.clock, this.scheduler)), new MeterMetric(this.clock, this.scheduler), this.clock);
+            return new TimerMetric(new HistogramMetric(new ExponentiallyDecayingReservoir(this.clock, this.scheduler)), new MeterMetric(this.clock, this.scheduler, this.scheduler), this.clock);
         }
 
         public TimerImplementation BuildTimer(string name, Unit unit, TimeUnit rateUnit, TimeUnit durationUnit, Histogram histogram)
         {
-            return new TimerMetric(new HistogramMetric(new ExponentiallyDecayingReservoir(this.clock, this.scheduler)), new MeterMetric(this.clock, this.scheduler), this.clock);
+            return new TimerMetric(new HistogramMetric(new ExponentiallyDecayingReservoir(this.clock, this.scheduler)), new MeterMetric(this.clock, this.scheduler, this.scheduler), this.clock);
         }
 
         public TimerImplementation BuildTimer(string name, Unit unit, TimeUnit rateUnit, TimeUnit durationUnit, Reservoir reservoir)
         {
-            return new TimerMetric(new HistogramMetric(new ExponentiallyDecayingReservoir(this.clock, this.scheduler)), new MeterMetric(this.clock, this.scheduler), this.clock);
+            return new TimerMetric(new HistogramMetric(new ExponentiallyDecayingReservoir(this.clock, this.scheduler)), new MeterMetric(this.clock, this.scheduler, this.scheduler), this.clock);
         }
+              
     }
 }

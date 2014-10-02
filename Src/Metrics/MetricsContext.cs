@@ -85,6 +85,8 @@ namespace Metrics
         /// <returns>Reference to the metric</returns>
         Meter Meter(string name, Unit unit, TimeUnit rateUnit = TimeUnit.Seconds, MetricTags tags = default(MetricTags));
 
+        SimpleMeter SimpleMeter(string name, Unit unit, TimeUnit rateUnit = TimeUnit.Seconds, MetricTags tags = default(MetricTags));
+
         /// <summary>
         /// A Histogram measures the distribution of values in a stream of data: e.g., the number of results returned by a search.
         /// </summary>

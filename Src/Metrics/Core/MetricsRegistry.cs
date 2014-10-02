@@ -24,6 +24,9 @@ namespace Metrics.Core
         Meter Meter<T>(string name, Func<T> builder, Unit unit, TimeUnit rateUnit, MetricTags tags)
             where T : MeterImplementation;
 
+        SimpleMeter SimpleMeter<T>(string name, Func<T> builder, Unit unit, TimeUnit rateUnit, MetricTags tags)
+           where T : SimpleMeterImplementation;
+
         Histogram Histogram<T>(string name, Func<T> builder, Unit unit, MetricTags tags)
             where T : HistogramImplementation;
 

@@ -14,7 +14,7 @@ namespace Metrics.Tests.Metrics
         public MeterMetricTests()
         {
             this.scheduler = new TestScheduler(this.clock);
-            this.meter = new MeterMetric(this.clock, this.scheduler);
+            this.meter = new MeterMetric(this.clock, this.scheduler, this.scheduler);
         }
 
         [Fact]

@@ -70,13 +70,14 @@ namespace Metrics.Core
         private readonly MetricMetaCatalog<MetricValueProvider<double>, GaugeValueSource, double> gauges = new MetricMetaCatalog<MetricValueProvider<double>, GaugeValueSource, double>();
         private readonly MetricMetaCatalog<Counter, CounterValueSource, CounterValue> counters = new MetricMetaCatalog<Counter, CounterValueSource, CounterValue>();
         private readonly MetricMetaCatalog<Meter, MeterValueSource, MeterValue> meters = new MetricMetaCatalog<Meter, MeterValueSource, MeterValue>();
+        private readonly MetricMetaCatalog<SimpleMeter, MeterValueSource, MeterValue> simpleMeters = new MetricMetaCatalog<SimpleMeter, MeterValueSource, MeterValue>();
         private readonly MetricMetaCatalog<Histogram, HistogramValueSource, HistogramValue> histograms =
             new MetricMetaCatalog<Histogram, HistogramValueSource, HistogramValue>();
         private readonly MetricMetaCatalog<Timer, TimerValueSource, TimerValue> timers = new MetricMetaCatalog<Timer, TimerValueSource, TimerValue>();
 
         public DefaultMetricsRegistry()
         {
-            this.DataProvider = new DefaultRegistryDataProvider(() => this.gauges.All, () => this.counters.All, () => this.meters.All, () => this.histograms.All, () => this.timers.All);
+            this.DataProvider = new DefaultRegistryDataProvider(() => this.gauges.All, () => this.counters.All, () => this.meters.All.Union(this.simpleMeters.All), () => this.histograms.All, () => this.timers.All);
         }
 
         public RegistryDataProvider DataProvider { get; private set; }
@@ -110,6 +111,16 @@ namespace Metrics.Core
             });
         }
 
+        public SimpleMeter SimpleMeter<T>(string name, Func<T> builder, Unit unit, TimeUnit rateUnit, MetricTags tags)
+            where T : SimpleMeterImplementation
+        {
+            return this.simpleMeters.GetOrAdd(name, () =>
+            {
+                T meter = builder();
+                return Tuple.Create((SimpleMeter)meter, new MeterValueSource(name, meter, unit, rateUnit, tags));
+            });
+        }
+
         public Histogram Histogram<T>(string name, Func<T> builder, Unit unit, MetricTags tags)
             where T : HistogramImplementation
         {
@@ -135,6 +146,7 @@ namespace Metrics.Core
             this.gauges.Clear();
             this.counters.Clear();
             this.meters.Clear();
+            this.simpleMeters.Clear();
             this.histograms.Clear();
             this.timers.Clear();
         }
@@ -144,6 +156,7 @@ namespace Metrics.Core
             this.gauges.Reset();
             this.counters.Reset();
             this.meters.Reset();
+            this.simpleMeters.Reset();
             this.histograms.Reset();
             this.timers.Reset();
         }

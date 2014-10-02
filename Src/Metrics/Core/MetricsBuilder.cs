@@ -10,6 +10,7 @@ namespace Metrics.Core
         MetricValueProvider<double> BuildGauge(string name, Unit unit, Func<double> valueProvider);
         CounterImplementation BuildCounter(string name, Unit unit);
         MeterImplementation BuildMeter(string name, Unit unit, TimeUnit rateUnit);
+        SimpleMeterImplementation BuildSimpleMeter(string name, Unit unit, TimeUnit rateUnit);
         HistogramImplementation BuildHistogram(string name, Unit unit, SamplingType samplingType);
         HistogramImplementation BuildHistogram(string name, Unit unit, Reservoir reservoir);
         TimerImplementation BuildTimer(string name, Unit unit, TimeUnit rateUnit, TimeUnit durationUnit, SamplingType samplingType);

@@ -15,7 +15,7 @@ namespace Metrics.Tests.Metrics
         public TimerMetricTests()
         {
             this.scheduler = new TestScheduler(clock);
-            this.timer = new TimerMetric(SamplingType.FavourRecent, new MeterMetric(clock, scheduler), clock);
+            this.timer = new TimerMetric(SamplingType.FavourRecent, new MeterMetric(clock, scheduler, scheduler), clock);
         }
 
         [Fact]

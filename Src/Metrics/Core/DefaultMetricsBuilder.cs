@@ -26,6 +26,11 @@ namespace Metrics.Core
             return new MeterMetric();
         }
 
+        public SimpleMeterImplementation BuildSimpleMeter(string name, Unit unit, TimeUnit rateUnit)
+        {
+            return new SimpleMeterMetric();
+        }
+
         public HistogramImplementation BuildHistogram(string name, Unit unit, SamplingType samplingType)
         {
             return new HistogramMetric(samplingType);
