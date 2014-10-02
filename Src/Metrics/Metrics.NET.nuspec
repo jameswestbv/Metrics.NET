@@ -16,6 +16,7 @@
   <files>
 
     <file src="$OutputPath$\Metrics.dll" target="lib" />
+    
     <file src="$OutputPath$\Metrics.pdb" target="lib" />
 
   </files>
